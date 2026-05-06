@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juana's Matter Lab 🔬</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* ── DYSLEXIA-FRIENDLY + GAMIFIED ── */
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d2e;
+  --surface2: #232640;
+  --border: #2e3256;
+  --gold: #ffd166;
+  --teal: #06d6a0;
+  --pink: #ff6b9d;
+  --blue: #4cc9f0;
+  --purple: #7b5ea7;
+  --text: #f0f2ff;
+  --text-dim: #8890c0;
+  --xp-bar: #ffd166;
+  /* dyslexia: generous spacing, rounded, warm */
+  --font-size-body: 1.05rem;
+  --line-height: 1.9;
+  --letter-spacing: 0.03em;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height);
+  letter-spacing: var(--letter-spacing);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── STARS BG ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(76,201,240,0.07) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, rgba(255,107,157,0.06) 0%, transparent 50%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── HUD ── */
+#hud {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(15,17,23,0.92);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.hud-name {
+  font-weight: 900; font-size: 1rem; color: var(--gold);
+  letter-spacing: 0.05em; white-space: nowrap;
+}
+.xp-wrap { flex: 1; min-width: 120px; }
+.xp-label { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 3px; letter-spacing: 0.08em; text-transform: uppercase; }
+.xp-bar-outer { background: var(--surface2); border-radius: 100px; height: 10px; overflow: hidden; }
+.xp-bar-inner { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--gold), #ff9f1c); transition: width 0.6s cubic-bezier(.34,1.56,.64,1); }
+.hud-stat { display: flex; flex-direction: column; align-items: center; }
+.hud-stat-val { font-size: 1.1rem; font-weight: 900; color: var(--teal); line-height: 1; }
+.hud-stat-lbl { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+.lives { display: flex; gap: 4px; }
+.heart { font-size: 1.1rem; transition: all 0.3s; }
+.heart.lost { filter: grayscale(1); opacity: 0.3; }
+
+/* ── SCREENS ── */
+.screen { display: none; position: relative; z-index: 1; }
+.screen.active { display: block; }
+
+/* ── HOME ── */
+#home {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 100px 20px 40px; text-align: center;
+}
+.hero-icon { font-size: 5rem; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+.hero-title {
+  font-size: clamp(2.2rem,7vw,3.8rem); font-weight: 900;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--pink) 50%, var(--blue) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1.15; margin-bottom: 10px;
+}
+.hero-sub { color: var(--text-dim); font-size: 1rem; margin-bottom: 36px; max-width: 400px; }
+.mode-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 14px; max-width: 760px; width: 100%; margin-bottom: 20px; }
+.mode-card {
+  background: var(--surface); border: 2px solid var(--border);
+  border-radius: 20px; padding: 24px 18px; cursor: pointer;
+  transition: all 0.25s; text-align: center;
+  position: relative; overflow: hidden;
+}
+.mode-card::before {
+  content: ''; position: absolute; inset: 0;
+  opacity: 0; transition: opacity 0.25s;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.04), transparent);
+}
+.mode-card:hover { transform: translateY(-6px); border-color: var(--gold); box-shadow: 0 12px 40px rgba(255,209,102,0.15); }
+.mode-card:hover::before { opacity: 1; }
+.mode-icon { font-size: 2.6rem; margin-bottom: 10px; }
+.mode-name { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.mode-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
+.mode-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; margin-top: 8px; }
+
+/* ── TOPIC SELECT ── */
+#topics { padding: 100px 20px 40px; max-width: 760px; margin: 0 auto; }
+.back-btn {
+  background: none; border: 1px solid var(--border); color: var(--text-dim);
+  padding: 7px 16px; border-radius: 100px; cursor: pointer; font-family: 'Nunito',sans-serif;
+  font-size: 0.82rem; margin-bottom: 24px; transition: all 0.2s;
+}
+.back-btn:hover { border-color: var(--gold); color: var(--gold); }
+.screen-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 6px; color: var(--text); }
+.screen-sub { color: var(--text-dim); margin-bottom: 24px; font-size: 0.9rem; }
+.topic-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 12px; }
+.topic-card {
+  background: var(--surface); border: 2px solid var(--border); border-radius: 16px;
+  padding: 20px 14px; cursor: pointer; text-align: center; transition: all 0.2s;
+}
+.topic-card:hover { border-color: var(--teal); transform: scale(1.03); box-shadow: 0 8px 28px rgba(6,214,160,0.12); }
+.topic-card .t-icon { font-size: 2rem; margin-bottom: 8px; }
+.topic-card .t-name { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+.topic-card .t-cards { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+
+/* ── FLASHCARD SCREEN ── */
+#flashcards { padding: 100px 20px 40px; max-width: 680px; margin: 0 auto; }
+.progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.progress-text { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
+.progress-track { flex: 1; height: 8px; background: var(--surface2); border-radius: 100px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--teal), var(--blue)); transition: width 0.4s ease; }
+
+/* Flashcard — big, clear, dyslexia-friendly */
+.flashcard-wrap { perspective: 1200px; width: 100%; }
+.flashcard {
+  width: 100%; min-height: 280px;
+  position: relative; transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(.4,0,.2,1);
+  cursor: pointer; border-radius: 24px;
+}
+.flashcard.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  border-radius: 24px; padding: 36px 32px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+}
+.card-front {
+  background: var(--surface);
+  border: 2px solid var(--border);
+}
+.card-back {
+  background: linear-gradient(135deg, rgba(6,214,160,0.12), rgba(76,201,240,0.08));
+  border: 2px solid rgba(6,214,160,0.35);
+  transform: rotateY(180deg);
+}
+.card-label { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 16px; }
+.card-question { font-size: 1.25rem; font-weight: 800; color: var(--text); line-height: 1.5; max-width: 480px; }
+.card-answer { font-size: 1.05rem; font-weight: 600; color: var(--teal); line-height: 1.65; max-width: 480px; }
+.card-hint { font-size: 0.78rem; color: var(--text-dim); margin-top: 14px; }
+.tap-hint {
+  text-align: center; color: var(--text-dim); font-size: 0.78rem;
+  margin-top: 14px; animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+
+.fc-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: center; flex-wrap: wrap; }
+.fc-btn {
+  padding: 12px 28px; border-radius: 100px; cursor: pointer; font-family: 'Nunito',sans-serif;
+  font-size: 0.92rem; font-weight: 800; border: none; transition: all 0.2s; letter-spacing: 0.02em;
+}
+.fc-btn.again { background: rgba(255,107,157,0.15); color: var(--pink); border: 2px solid rgba(255,107,157,0.3); }
+.fc-btn.again:hover { background: rgba(255,107,157,0.25); transform: scale(1.04); }
+.fc-btn.good { background: rgba(6,214,160,0.15); color: var(--teal); border: 2px solid rgba(6,214,160,0.3); }
+.fc-btn.good:hover { background: rgba(6,214,160,0.25); transform: scale(1.04); }
+
+/* ── QUIZ SCREEN ── */
+#quiz-screen { padding: 100px 20px 40px; max-width: 680px; margin: 0 auto; }
+.quiz-card {
+  background: var(--surface); border: 2px solid var(--border); border-radius: 24px; padding: 32px 28px;
+  margin-bottom: 16px; position: relative; overflow: hidden;
+  animation: slideIn 0.4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes slideIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+.quiz-num { font-size: 0.68rem; color: var(--text-dim); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+/* DYSLEXIA: large, well-spaced question text */
+.quiz-q-text {
+  font-size: 1.15rem; font-weight: 800; color: var(--text);
+  line-height: 1.6; margin-bottom: 22px; letter-spacing: 0.02em;
+}
+.quiz-img { font-size: 3rem; text-align: center; margin-bottom: 16px; }
+.q-options { display: flex; flex-direction: column; gap: 10px; }
+.q-opt {
+  background: var(--surface2); border: 2px solid var(--border); border-radius: 14px;
+  padding: 14px 20px; cursor: pointer; font-family: 'Nunito',sans-serif;
+  font-size: 0.95rem; font-weight: 600; color: var(--text-dim);
+  transition: all 0.18s; text-align: left; display: flex; align-items: center; gap: 14px;
+  letter-spacing: 0.02em; line-height: 1.5;
+}
+.q-opt:hover:not(:disabled) { border-color: var(--blue); color: var(--text); background: rgba(76,201,240,0.07); transform: translateX(4px); }
+.q-opt .opt-letter {
+  width: 30px; height: 30px; border-radius: 50%; background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 900; flex-shrink: 0; transition: all 0.2s;
+}
+.q-opt.correct { border-color: var(--teal); background: rgba(6,214,160,0.1); color: var(--teal); }
+.q-opt.correct .opt-letter { background: var(--teal); color: #0f1117; }
+.q-opt.wrong { border-color: var(--pink); background: rgba(255,107,157,0.1); color: var(--pink); }
+.q-opt.wrong .opt-letter { background: var(--pink); color: #fff; }
+.q-opt:disabled { cursor: not-allowed; }
+
+.quiz-feedback {
+  border-radius: 14px; padding: 16px 20px; margin-top: 14px; font-size: 0.9rem; font-weight: 700;
+  display: none; animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  line-height: 1.6;
+}
+@keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+.quiz-feedback.right { background: rgba(6,214,160,0.12); border: 1px solid rgba(6,214,160,0.3); color: var(--teal); }
+.quiz-feedback.wrong-fb { background: rgba(255,107,157,0.12); border: 1px solid rgba(255,107,157,0.3); color: var(--pink); }
+
+.next-btn {
+  width: 100%; padding: 16px; border-radius: 14px; cursor: pointer; border: none;
+  background: linear-gradient(135deg, var(--gold), #ff9f1c);
+  color: #1a1000; font-family: 'Nunito',sans-serif; font-size: 1rem; font-weight: 900;
+  transition: all 0.2s; letter-spacing: 0.03em; margin-top: 14px; display: none;
+}
+.next-btn:hover { transform: scale(1.02); box-shadow: 0 6px 24px rgba(255,209,102,0.3); }
+
+/* ── RESULTS SCREEN ── */
+#results { padding: 100px 20px 40px; max-width: 640px; margin: 0 auto; text-align: center; }
+.results-trophy { font-size: 5rem; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+.results-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 8px; }
+.results-score { font-size: 4rem; font-weight: 900; color: var(--gold); margin: 16px 0; line-height: 1; }
+.results-stars { font-size: 2rem; margin-bottom: 24px; }
+.results-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin: 24px 0; }
+.res-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px 10px; text-align: center; }
+.res-stat-val { font-size: 1.8rem; font-weight: 900; color: var(--teal); }
+.res-stat-lbl { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+.results-msg { font-size: 0.95rem; color: var(--text-dim); max-width: 420px; margin: 0 auto 28px; line-height: 1.7; }
+.results-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.res-btn {
+  padding: 13px 28px; border-radius: 100px; cursor: pointer; font-family: 'Nunito',sans-serif;
+  font-size: 0.92rem; font-weight: 800; transition: all 0.2s;
+}
+.res-btn.primary { background: linear-gradient(135deg, var(--gold), #ff9f1c); color: #1a1000; border: none; }
+.res-btn.secondary { background: none; border: 2px solid var(--border); color: var(--text-dim); }
+.res-btn:hover { transform: scale(1.04); }
+
+/* ── XP TOAST ── */
+#xp-toast {
+  position: fixed; top: 70px; right: 20px; z-index: 300;
+  background: var(--gold); color: #1a1000; font-family: 'Nunito',sans-serif;
+  font-weight: 900; font-size: 1rem; padding: 10px 20px; border-radius: 100px;
+  pointer-events: none; opacity: 0; transform: translateY(-10px);
+  transition: all 0.3s; letter-spacing: 0.03em;
+}
+#xp-toast.show { opacity: 1; transform: translateY(0); }
+
+/* ── ACHIEVEMENT TOAST ── */
+#achievement-toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+  z-index: 300; background: var(--surface);
+  border: 2px solid var(--gold); border-radius: 20px; padding: 16px 24px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 8px 40px rgba(255,209,102,0.2);
+  transition: all 0.5s cubic-bezier(.34,1.56,.64,1); pointer-events: none;
+  white-space: nowrap;
+}
+#achievement-toast.show { transform: translateX(-50%) translateY(0); }
+.ach-icon { font-size: 2rem; }
+.ach-text-title { font-size: 0.7rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
+.ach-text-name { font-size: 1rem; font-weight: 900; color: var(--text); }
+
+/* ── STREAK ── */
+.streak-fire { color: var(--gold); font-size: 1.1rem; }
+
+/* Accessibility: focus rings */
+button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+/* Confetti canvas */
+#confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 400; }
+
+@media(max-width:500px){
+  .card-question{font-size:1.1rem}
+  .quiz-q-text{font-size:1.05rem}
+  .results-score{font-size:3rem}
+  .results-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+<div id="xp-toast">+50 XP ⭐</div>
+<div id="achievement-toast">
+  <div class="ach-icon" id="ach-icon">🏆</div>
+  <div>
+    <div class="ach-text-title">Achievement Unlocked!</div>
+    <div class="ach-text-name" id="ach-name">First Steps</div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-name">🔬 Juana</div>
+  <div class="xp-wrap">
+    <div class="xp-label">Level <span id="level-num">1</span> — <span id="xp-current">0</span>/<span id="xp-next">100</span> XP</div>
+    <div class="xp-bar-outer"><div class="xp-bar-inner" id="xp-bar" style="width:0%"></div></div>
+  </div>
+  <div class="hud-stat"><div class="hud-stat-val" id="streak-val">0</div><div class="hud-stat-lbl">🔥 Streak</div></div>
+  <div class="lives" id="lives-hud">
+    <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
+  </div>
+</div>
+
+<!-- ══════════ HOME ══════════ -->
+<div id="home" class="screen active">
+  <div class="hero-icon">🧪</div>
+  <div class="hero-title">Matter Lab</div>
+  <p class="hero-sub">Your science lab. Learn by playing — no stress! ✨</p>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="goTopics('flash')" tabindex="0">
+      <div class="mode-icon">🃏</div>
+      <div class="mode-name">Flashcards</div>
+      <div class="mode-desc">Review concept by concept. Take your time!</div>
+      <span class="mode-badge" style="background:rgba(76,201,240,0.15);color:var(--blue)">MEMORISE</span>
+    </div>
+    <div class="mode-card" onclick="startQuiz()" tabindex="0">
+      <div class="mode-icon">⚡</div>
+      <div class="mode-name">Quick Exam</div>
+      <div class="mode-desc">10 exam questions with instant feedback</div>
+      <span class="mode-badge" style="background:rgba(255,209,102,0.15);color:var(--gold)">EXAM</span>
+    </div>
+    <div class="mode-card" onclick="goTopics('mini')" tabindex="0">
+      <div class="mode-icon">🎯</div>
+      <div class="mode-name">Mini Quiz</div>
+      <div class="mode-desc">5 questions on one topic. Quick and focused!</div>
+      <span class="mode-badge" style="background:rgba(255,107,157,0.15);color:var(--pink)">PRACTICE</span>
+    </div>
+  </div>
+  <p style="color:var(--text-dim);font-size:0.8rem">Your progress is saved during this session 🌟</p>
+</div>
+
+<!-- ══════════ TOPIC SELECT ══════════ -->
+<div id="topics" class="screen">
+  <button class="back-btn" onclick="goHome()">← Back</button>
+  <div class="screen-title">Which topic do you want to study?</div>
+  <div class="screen-sub">Pick one — one thing at a time! 🎯</div>
+  <div class="topic-grid" id="topic-grid"></div>
+</div>
+
+<!-- ══════════ FLASHCARDS ══════════ -->
+<div id="flashcards" class="screen">
+  <button class="back-btn" onclick="goHome()">← Back</button>
+  <div class="screen-title" id="fc-topic-title">Flashcards</div>
+  <div class="progress-row">
+    <div class="progress-text" id="fc-progress-text">1 of 6</div>
+    <div class="progress-track"><div class="progress-fill" id="fc-progress-fill" style="width:0%"></div></div>
+  </div>
+  <div class="flashcard-wrap">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="card-face card-front">
+        <div class="card-label">❓ Question</div>
+        <div class="card-question" id="fc-question">Cargando...</div>
+        <div class="card-hint" id="fc-hint"></div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-label">✅ Answer</div>
+        <div class="card-answer" id="fc-answer">Cargando...</div>
+      </div>
+    </div>
+  </div>
+  <p class="tap-hint" id="tap-hint">👆 Tap the card to reveal the answer</p>
+  <div class="fc-actions" id="fc-actions" style="display:none">
+    <button class="fc-btn again" onclick="fcAgain()">😅 Try Again</button>
+    <button class="fc-btn good" onclick="fcGood()">✅ Got it!</button>
+  </div>
+</div>
+
+<!-- ══════════ QUIZ ══════════ -->
+<div id="quiz-screen" class="screen">
+  <button class="back-btn" onclick="goHome()">← Exit Exam</button>
+  <div class="screen-title" id="quiz-title">Quick Exam ⚡</div>
+  <div class="progress-row" style="margin-bottom:24px">
+    <div class="progress-text" id="q-progress-text">Question 1 of 10</div>
+    <div class="progress-track"><div class="progress-fill" id="q-progress-fill" style="width:0%"></div></div>
+  </div>
+  <div id="quiz-container"></div>
+</div>
+
+<!-- ══════════ RESULTS ══════════ -->
+<div id="results" class="screen">
+  <div class="results-trophy" id="results-trophy">🏆</div>
+  <div class="results-title" id="results-title">Incredible!</div>
+  <div class="results-score" id="results-score">8/10</div>
+  <div class="results-stars" id="results-stars">⭐⭐⭐</div>
+  <p class="results-msg" id="results-msg">Mensaje</p>
+  <div class="results-grid">
+    <div class="res-stat"><div class="res-stat-val" id="r-correct">0</div><div class="res-stat-lbl">Correct ✅</div></div>
+    <div class="res-stat"><div class="res-stat-val" id="r-xp">0</div><div class="res-stat-lbl">XP earned ⭐</div></div>
+    <div class="res-stat"><div class="res-stat-val" id="r-streak">0</div><div class="res-stat-lbl">Streak 🔥</div></div>
+  </div>
+  <div class="results-btns">
+    <button class="res-btn primary" onclick="startQuiz()">🔄 Try Again</button>
+    <button class="res-btn secondary" onclick="goHome()">🏠 Home</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════
+   DATA — ALL CLASS CONTENT
+═══════════════════════════════ */
+const TOPICS = [
+  { id:'matter', name:'Matter', icon:'⚗️', color:'var(--blue)' },
+  { id:'mass-vol', name:'Mass & Volume', icon:'⚖️', color:'var(--teal)' },
+  { id:'density', name:'Density', icon:'🔬', color:'var(--gold)' },
+  { id:'states', name:'States', icon:'🧊', color:'var(--pink)' },
+  { id:'changes', name:'Changes of State', icon:'🌡️', color:'var(--purple)' },
+  { id:'properties', name:'Properties', icon:'🔍', color:'var(--blue)' },
+];
+
+const FLASHCARDS = {
+  matter: [
+    { q:'What is matter?', a:'Anything that has MASS and takes up space (VOLUME).', hint:'Think: can I touch it?' },
+    { q:'Is light matter?', a:'NO. Light has no mass and takes up no volume. Neither does heat or sound.', hint:'Energy ≠ matter' },
+    { q:'What does Particle Theory say?', a:'All matter is made up of tiny particles arranged in different ways.', hint:'Think: what is everything made of?' },
+    { q:'How do particles move in a SOLID?', a:'They vibrate in fixed positions. They cannot move freely.', hint:'Piensa en un cubo of hielo' },
+    { q:'How do particles move in a LIQUID?', a:'They vibrate, rotate and translate (move around) but stay close together.', hint:'Think: water' },
+    { q:'How do particles move in a GAS?', a:'They move very fast in all directions. Forces between them are almost zero.', hint:'Think: air' },
+  ],
+  'mass-vol': [
+    { q:'What is MASS?', a:'The amount of matter inside an object. Measured in g or kg. Does NOT change with location (even on the Moon).', hint:'Unit: kilogram (kg)' },
+    { q:'Is Mass the same as Weight?', a:'NO. WEIGHT is the force of gravity. On the Moon: mass = 10 kg (same), but weight = 16 N (less than Earth\'s 98 N).', hint:'In space: weight = 0, mass = unchanged' },
+    { q:'What is VOLUME?', a:'The amount of space an object occupies. Measured in mL, L or cm³. 1 cm³ = 1 mL.', hint:'A 1 cm × 1 cm × 1 cm cube' },
+    { q:'How do we measure the volume of a rock (irregular shape)?', a:'Water displacement method: 11 mL - 7 mL = 4 mL is the rock\'s volume.', hint:'Graduated cylinder with water' },
+    { q:'What instrument do we use to measure mass?', a:'A balance or scale. Using the metric system (g, kg).', hint:'Not a thermometer!' },
+    { q:'A bowling ball and a basketball have the same volume. Do they have the same mass?', a:'NO. They have the same volume (space they occupy) but different mass (amount of matter).', hint:'Think: which one is heavier?' },
+  ],
+  density: [
+    { q:'What is DENSITY?', a:'The amount of mass in a certain volume. INTENSIVE property — does not change with quantity.', hint:'ρ = mass / volume' },
+    { q:'Density formula', a:'ρ = mass ÷ volume. Also: m = ρ × V and V = m ÷ ρ', hint:'Triangle: m on top, ρ × V below' },
+    { q:'What is the density of water?', a:'1 g/mL (or 1 g/cm³). Oil is 0.9 g/mL and honey ≈ 1.4 g/mL.', hint:'Reference for comparisons' },
+    { q:'An object with density less than the liquid...', a:'FLOATS. If its density is greater than the liquid → SINKS.', hint:'Oil floats on water because 0.9 < 1.0' },
+    { q:'In a density column, which liquid goes at the BOTTOM?', a:'The most dense: honey (1.4 g/mL) → water (1.0) → oil (0.9) on top.', hint:'Greater density = bottom' },
+    { q:'Why is density an INTENSIVE property?', a:'Because it does not change with the amount of substance. A glass of water and a lake have the same density.', hint:'Cut the sample in half: does it change?' },
+  ],
+  states: [
+    { q:'What are the 3 main states of matter?', a:'SOLID: fixed shape and volume. LIQUID: fixed volume, variable shape. GAS: no fixed shape or volume.', hint:'Ice, water, steam' },
+    { q:'What are the properties of a SOLID?', a:'FIXED volume + FIXED shape. Particles vibrate in fixed positions. Cannot be compressed. Strong attractive forces.', hint:'Piensa: un cubo of hielo' },
+    { q:'What are the properties of a LIQUID?', a:'FIXED volume, VARIABLE shape (takes the shape of its container). Cannot be compressed. Weaker forces than in a solid.', hint:'Think: water in a glass' },
+    { q:'What are the properties of a GAS?', a:'No fixed volume, no fixed shape. CAN be compressed. Forces between particles ≈ zero. Particles move very fast.', hint:'Think: air' },
+    { q:'What is the MELTING POINT?', a:'The temperature at which a SOLID turns into a LIQUID. For water: 0°C.', hint:'Intensive property' },
+    { q:'What is the BOILING POINT?', a:'The temperature at which a LIQUID turns into a GAS. For water: 100°C.', hint:'Intensive property' },
+  ],
+  changes: [
+    { q:'What is EVAPORATION?', a:'Change from LIQUID to GAS. Particles GAIN energy and move faster. Example: clothes drying in the sun.', hint:'Class Demo 1' },
+    { q:'What is CONDENSATION?', a:'Change from GAS to LIQUID. Particles LOSE energy and move more slowly. Example: water drops on a cold can.', hint:'Class Demo 2' },
+    { q:'What is MELTING (fusion)?', a:'Change from SOLID to LIQUID. Particles gain energy. Example: ice melting.', hint:'Snowman melting' },
+    { q:'What is FREEZING (solidification)?', a:'Change from LIQUID to SOLID. Particles lose energy. Example: water freezing, lava cooling.', hint:'Freezing = solidification' },
+    { q:'What is SUBLIMATION?', a:'Change from SOLID to GAS directly (without becoming liquid). Example: dry ice, mothballs.', hint:'Direct: solid → gas' },
+    { q:'What is DEPOSITION?', a:'Change from GAS to SOLID directly. Example: frost on leaves.', hint:'Direct: gas → solid' },
+  ],
+  properties: [
+    { q:'What are PHYSICAL properties?', a:'Properties that can be observed WITHOUT changing the substance: colour, shape, mass, volume, density, melting point, hardness.', hint:'No chemical reaction needed' },
+    { q:'What are CHEMICAL properties?', a:'Only observed during a chemical reaction. E.g.: flammability (how easily it burns) and reactivity (how easily it reacts with another substance).', hint:'Rust = chemical property' },
+    { q:'What are INTENSIVE properties?', a:'Do NOT depend on the amount of matter. E.g.: density, colour, odour, hardness, conductivity, boiling point.', hint:'Cut gold in half: does the colour change?' },
+    { q:'What are EXTENSIVE properties?', a:'DO depend on the amount of matter. E.g.: mass, volume, weight.', hint:'More matter = more mass' },
+    { q:'Is flammability intensive or extensive?', a:'It is a CHEMICAL property. It describes how easily something catches fire and burns.', hint:'Wood = very flammable' },
+    { q:'Gold ring vs gold bar. Which properties are the SAME for both?', a:'The intensive ones: golden colour, density, melting point, conductivity. Extensive ones (mass, volume) are different.', hint:'From class: gold ring vs gold bar' },
+  ],
+};
+
+// ── ALL QUIZ QUESTIONS (class-based) ──
+const ALL_QUIZ = [
+  { topic:'changes', emoji:'🧊→💧', q:'A cold can of soda has water droplets on the outside. What change of state is happening to the water vapour in the air?', opts:['Evaporation','Condensation','Melting','Sublimation'], ans:1, exp:'The water vapour (gas) touches the cold surface → loses energy → becomes liquid. That is CONDENSATION.' },
+  { topic:'changes', emoji:'💧→💨', q:'In class Demo 1, the water drop near the hot water disappeared faster because its particles…', opts:['Lost energy and moved more slowly','Gained energy and moved faster, escaping into the air as gas','Turned into a solid','Changed colour'], ans:1, exp:'Heat → particles GAIN energy → move FASTER → escape into the air. That is EVAPORATION.' },
+  { topic:'changes', emoji:'❄️', q:'Frost on leaves: water vapour (gas) turns directly into ice (solid). What is this called?', opts:['Condensation','Freezing','Deposition','Sublimation'], ans:2, exp:'Gas → Solid DIRECTLY = DEPOSITION. It is the opposite of sublimation.' },
+  { topic:'density', emoji:'🛢️', q:'Columna of densidad: aceite (0.9 g/mL), agua (1.0 g/mL), miel (1.4 g/mL). Orden correcto of arriba a abajo:', opts:['Honey → Water → Oil','Oil → Water → Honey','Water → Oil → Honey','They all mix together'], ans:1, exp:'LOWER density → TOP. Oil (0.9) < Water (1.0) < Honey (1.4). The most dense sinks to the bottom!' },
+  { topic:'properties', emoji:'🔍', q:'Which of the following is an INTENSIVE property?', opts:['Mass','Volume','Density','Weight'], ans:2, exp:'DENSITY does not change with the amount of substance → INTENSIVE. Mass, volume and weight DO change → extensive.' },
+  { topic:'mass-vol', emoji:'🪨', q:'You measure 7 mL of water. You drop in a rock. The water rises to 11 mL. What is the volume of the rock?', opts:['11 mL','7 mL','4 mL','18 mL'], ans:2, exp:'11 mL - 7 mL = 4 mL. Water displacement method for irregular solids.' },
+  { topic:'states', emoji:'💨', q:'Which correctly describes a GAS according to particle theory?', opts:['Fixed volume and fixed shape; particles vibrate in place; cannot be compressed','Fixed volume, no fixed shape; particles move around; cannot be compressed','No fixed volume or shape; particles move very fast; can be compressed','Stationary particles very far apart'], ans:2, exp:'GAS: no fixed volume or shape, particles move very fast, forces ≈ zero, CAN be compressed.' },
+  { topic:'mass-vol', emoji:'⚽', q:'You have 4 identical balls. Each has a mass of 250 g. What is the total mass in KILOGRAMS?', opts:['0.25 kg','1 kg','4 kg','250 kg'], ans:1, exp:'4 × 250 g = 1000 g = 1 kg. (1 kg = 1000 g)' },
+  { topic:'properties', emoji:'🔥', q:'Flammability (how easily something catches fire) is a…', opts:['Physical intensive property','Physical extensive property','Chemical property','Not a property of matter'], ans:2, exp:'FLAMMABILITY = CHEMICAL property. Only observed during a chemical reaction (combustion). Same as reactivity.' },
+  { topic:'changes', emoji:'🕯️', q:'Particles go from very spread out (few, far apart) to closely packed together (many). What change of state is shown?', opts:['Freezing','Condensation','Sublimation','Evaporation'], ans:1, exp:'Many particles packed together = denser = liquid. They came from being spread out (gas). Gas → Liquid = CONDENSATION.' },
+  { topic:'states', emoji:'🧊', q:'What is the MELTING POINT of water and what does it mean?', opts:['100°C — when water boils','0°C — when the solid (ice) turns into liquid','0°C — when the liquid freezes','100°C — when gas condenses'], ans:1, exp:'MELTING POINT = temperature at which SOLID → LIQUID. For water = 0°C. It is an INTENSIVE property.' },
+  { topic:'density', emoji:'🔬', q:'An object has mass = 30 g and volume = 10 cm³. What is its density?', opts:['300 g/cm³','0.33 g/cm³','3 g/cm³','30 g/cm³'], ans:2, exp:'ρ = mass ÷ volume = 30 ÷ 10 = 3 g/cm³. Formula: ρ = m/V.' },
+  { topic:'matter', emoji:'💡', q:'Which of these is NOT matter?', opts:['Air','Light','A rock','Water'], ans:1, exp:'LIGHT has no mass and takes up no volume. Neither heat nor sound are matter.' },
+  { topic:'properties', emoji:'🥇', q:'A small gold ring and a large gold bar. Which property is the SAME for both?', opts:['Mass','Volume','Density','Weight'], ans:2, exp:'DENSITY is the same because it is an INTENSIVE property — it does not depend on how much gold there is. Mass and volume are different (extensive).' },
+  { topic:'mass-vol', emoji:'🌕', q:'On the Moon your mass is 10 kg (same as on Earth). Your weight on the Moon is…', opts:['Also 10 kg (the same)','Greater than on Earth','Less than on Earth (≈16 N vs 98 N on Earth)','Zero'], ans:2, exp:'La MASA no cambia (cantidad of materia). El PESO depende of the gravedad — en la Luna la gravedad es menor, entonces el peso es menor.' },
+];
+
+/* ═══════════════════════════════
+   GAME STATE
+═══════════════════════════════ */
+let xp = 0, level = 1, streak = 0, lives = 3;
+let fcCards = [], fcIndex = 0, fcFlipped = false;
+let quizQuestions = [], quizIndex = 0, quizCorrect = 0, quizAnswered = false;
+let currentMode = 'flash';
+const XP_PER_LEVEL = [0,100,250,450,700,1000];
+
+/* ═══════════════════════════════
+   NAVIGATION
+═══════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goHome() { showScreen('home'); }
+function goTopics(mode) {
+  currentMode = mode;
+  renderTopics();
+  showScreen('topics');
+}
+
+/* ═══════════════════════════════
+   TOPICS
+═══════════════════════════════ */
+function renderTopics() {
+  const grid = document.getElementById('topic-grid');
+  grid.innerHTML = TOPICS.map(t => `
+    <div class="topic-card" onclick="selectTopic('${t.id}')" tabindex="0">
+      <div class="t-icon">${t.icon}</div>
+      <div class="t-name">${t.name}</div>
+      <div class="t-cards">${FLASHCARDS[t.id].length} cards</div>
+    </div>`).join('');
+}
+function selectTopic(id) {
+  if (currentMode === 'flash') startFlash(id);
+  else startMiniQuiz(id);
+}
+
+/* ═══════════════════════════════
+   FLASHCARDS
+═══════════════════════════════ */
+function startFlash(topicId) {
+  fcCards = shuffle([...FLASHCARDS[topicId]]);
+  fcIndex = 0;
+  const topic = TOPICS.find(t => t.id === topicId);
+  document.getElementById('fc-topic-title').textContent = topic.icon + ' ' + topic.name;
+  showScreen('flashcards');
+  showFC();
+}
+function showFC() {
+  const card = fcCards[fcIndex];
+  if (!card) { endFlash(); return; }
+  fcFlipped = false;
+  const el = document.getElementById('flashcard');
+  el.classList.remove('flipped');
+  document.getElementById('fc-question').textContent = card.q;
+  document.getElementById('fc-answer').textContent = card.a;
+  document.getElementById('fc-hint').textContent = card.hint ? '💭 ' + card.hint : '';
+  document.getElementById('tap-hint').style.display = 'block';
+  document.getElementById('fc-actions').style.display = 'none';
+  const pct = Math.round((fcIndex / fcCards.length) * 100);
+  document.getElementById('fc-progress-fill').style.width = pct + '%';
+  document.getElementById('fc-progress-text').textContent = (fcIndex + 1) + ' of ' + fcCards.length;
+}
+function flipCard() {
+  if (fcFlipped) return;
+  fcFlipped = true;
+  document.getElementById('flashcard').classList.add('flipped');
+  document.getElementById('tap-hint').style.display = 'none';
+  document.getElementById('fc-actions').style.display = 'flex';
+}
+function fcAgain() {
+  // Put card back randomly
+  const card = fcCards.splice(fcIndex, 1)[0];
+  const insertAt = fcIndex + Math.floor(Math.random() * 3) + 1;
+  fcCards.splice(Math.min(insertAt, fcCards.length), 0, card);
+  showFC();
+}
+function fcGood() {
+  addXP(20);
+  streak++;
+  updateHUD();
+  fcIndex++;
+  if (fcIndex >= fcCards.length) endFlash();
+  else showFC();
+}
+function endFlash() {
+  addXP(30);
+  showToast('+30 XP Bonus! 🌟');
+  checkAchievements('flash');
+  setTimeout(goHome, 400);
+}
+
+/* ═══════════════════════════════
+   QUIZ
+═══════════════════════════════ */
+function startQuiz() {
+  quizQuestions = shuffle([...ALL_QUIZ]).slice(0, 10);
+  quizIndex = 0; quizCorrect = 0;
+  lives = 3; updateLives();
+  document.getElementById('quiz-title').textContent = '⚡ Quick Exam';
+  showScreen('quiz-screen');
+  renderQuestion();
+}
+function startMiniQuiz(topicId) {
+  const topicQs = ALL_QUIZ.filter(q => q.topic === topicId);
+  quizQuestions = shuffle([...topicQs]).slice(0, Math.min(5, topicQs.length));
+  quizIndex = 0; quizCorrect = 0;
+  lives = 3; updateLives();
+  const topic = TOPICS.find(t => t.id === topicId);
+  document.getElementById('quiz-title').textContent = topic.icon + ' ' + topic.name;
+  showScreen('quiz-screen');
+  renderQuestion();
+}
+function renderQuestion() {
+  if (quizIndex >= quizQuestions.length) { showResults(); return; }
+  const q = quizQuestions[quizIndex];
+  quizAnswered = false;
+  const total = quizQuestions.length;
+  const pct = Math.round((quizIndex / total) * 100);
+  document.getElementById('q-progress-fill').style.width = pct + '%';
+  document.getElementById('q-progress-text').textContent = 'Question ' + (quizIndex+1) + ' of ' + total;
+
+  const letters = ['A','B','C','D'];
+  const html = `
+    <div class="quiz-card">
+      <div class="quiz-num">Question ${quizIndex+1} of ${total}</div>
+      <div class="quiz-img">${q.emoji}</div>
+      <div class="quiz-q-text">${q.q}</div>
+      <div class="q-options">
+        ${q.opts.map((opt,i) => `
+          <button class="q-opt" onclick="answerQ(${i})" id="opt-${i}">
+            <span class="opt-letter">${letters[i]}</span>
+            <span>${opt}</span>
+          </button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQ()">
+        ${quizIndex+1 < total ? 'Next →' : 'See results! 🏆'}
+      </button>
+    </div>`;
+  document.getElementById('quiz-container').innerHTML = html;
+}
+function answerQ(i) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const q = quizQuestions[quizIndex];
+  const opts = document.querySelectorAll('.q-opt');
+  const fb = document.getElementById('quiz-feedback');
+  opts.forEach(o => o.disabled = true);
+
+  if (i === q.ans) {
+    opts[i].classList.add('correct');
+    quizCorrect++;
+    streak++;
+    addXP(50);
+    fb.className = 'quiz-feedback right';
+    fb.textContent = '✅ Correct! +50 XP — ' + q.exp;
+    fb.style.display = 'block';
+    showToast('+50 XP ⭐');
+  } else {
+    opts[i].classList.add('wrong');
+    opts[q.ans].classList.add('correct');
+    streak = 0;
+    loseLife();
+    fb.className = 'quiz-feedback wrong-fb';
+    fb.textContent = '❌ ' + q.exp;
+    fb.style.display = 'block';
+  }
+  updateHUD();
+  document.getElementById('next-btn').style.display = 'block';
+}
+function nextQ() {
+  quizIndex++;
+  renderQuestion();
+}
+
+/* ═══════════════════════════════
+   RESULTS
+═══════════════════════════════ */
+function showResults() {
+  const total = quizQuestions.length;
+  const pct = quizCorrect / total;
+  let trophy = '🏆', title = '', stars = '', msg = '';
+  if (pct >= 0.9) { trophy='🌟'; title='Perfect, Juana!'; stars='⭐⭐⭐'; msg='You mastered every topic! You are more than ready for the exam. You are a scientist! 🔬✨'; }
+  else if (pct >= 0.7) { trophy='😊'; title='Great job!'; stars='⭐⭐'; msg='Almost perfect! Review the topics you missed using Flashcards, then try again. You are doing great!'; }
+  else if (pct >= 0.5) { trophy='💪'; title='Good effort!'; stars='⭐'; msg='You are on the right track! Use the Flashcards for the tricky topics — one at a time. You can do this!'; }
+  else { trophy='📚'; title='Keep studying!'; stars=''; msg='No worries — everyone starts somewhere! Open the Flashcards for one topic, learn it well, then come back to the exam.'; }
+
+  document.getElementById('results-trophy').textContent = trophy;
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-score').textContent = quizCorrect + '/' + total;
+  document.getElementById('results-stars').textContent = stars;
+  document.getElementById('results-msg').textContent = msg;
+  document.getElementById('r-correct').textContent = quizCorrect;
+  document.getElementById('r-xp').textContent = quizCorrect * 50;
+  document.getElementById('r-streak').textContent = streak;
+  showScreen('results');
+  if (pct >= 0.7) launchConfetti();
+  checkAchievements('quiz');
+}
+
+/* ═══════════════════════════════
+   XP & LEVELING
+═══════════════════════════════ */
+function addXP(amount) {
+  xp += amount;
+  const thresholds = [0,100,250,450,700,1000,1500];
+  while (level < thresholds.length-1 && xp >= thresholds[level]) {
+    level++;
+    showAchievement('⬆️', 'Level Up! You reached level ' + level + '!');
+  }
+  const cur = thresholds[level-1] || 0;
+  const nxt = thresholds[level] || thresholds[thresholds.length-1];
+  const pct = Math.min(100, ((xp - cur) / (nxt - cur)) * 100);
+  document.getElementById('xp-bar').style.width = pct + '%';
+  document.getElementById('xp-current').textContent = xp;
+  document.getElementById('xp-next').textContent = nxt;
+  document.getElementById('level-num').textContent = level;
+}
+function updateHUD() {
+  document.getElementById('streak-val').textContent = streak;
+}
+function loseLife() {
+  lives = Math.max(0, lives - 1);
+  updateLives();
+}
+function updateLives() {
+  const hearts = document.querySelectorAll('.heart');
+  hearts.forEach((h,i) => { h.classList.toggle('lost', i >= lives); });
+}
+
+/* ═══════════════════════════════
+   TOASTS & ACHIEVEMENTS
+═══════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('xp-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+function showAchievement(icon, name) {
+  const t = document.getElementById('achievement-toast');
+  document.getElementById('ach-icon').textContent = icon;
+  document.getElementById('ach-name').textContent = name;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+function checkAchievements(context) {
+  if (context === 'flash' && fcIndex >= 6) showAchievement('🃏','Flashcard Master!');
+  if (context === 'quiz' && quizCorrect === quizQuestions.length) showAchievement('🌟','Perfect Score!');
+  if (streak >= 5) showAchievement('🔥','🔥 Streak of ' + streak + '!');
+}
+
+/* ═══════════════════════════════
+   CONFETTI
+═══════════════════════════════ */
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({length:120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    r: Math.random() * 8 + 4,
+    c: ['#ffd166','#06d6a0','#4cc9f0','#ff6b9d','#7b5ea7'][Math.floor(Math.random()*5)],
+    v: Math.random() * 3 + 2,
+    a: Math.random() * Math.PI * 2,
+    spin: (Math.random() - 0.5) * 0.2
+  }));
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r);
+      ctx.restore();
+      p.y += p.v;
+      p.a += p.spin;
+      p.x += Math.sin(p.a) * 0.8;
+      if (p.y > canvas.height) p.y = -20;
+    });
+    frame++;
+    if (frame < 200) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+
+/* ═══════════════════════════════
+   UTILS
+═══════════════════════════════ */
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Keyboard support for mode cards
+document.querySelectorAll('.mode-card').forEach(c => {
+  c.addEventListener('keypress', e => { if(e.key==='Enter'||e.key===' ') c.click(); });
+});
+</script>
+</body>
+</html>
