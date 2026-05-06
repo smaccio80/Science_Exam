@@ -36,7 +36,7 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-
+ 
 /* ── STARS BG ── */
 body::before {
   content: '';
@@ -45,10 +45,10 @@ body::before {
               radial-gradient(ellipse at 80% 80%, rgba(255,107,157,0.06) 0%, transparent 50%);
   pointer-events: none; z-index: 0;
 }
-
+ 
 /* ── HUD ── */
 #hud {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  position: sticky; top: 0; left: 0; right: 0; z-index: 200;
   background: rgba(15,17,23,0.92);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
@@ -69,11 +69,11 @@ body::before {
 .lives { display: flex; gap: 4px; }
 .heart { font-size: 1.1rem; transition: all 0.3s; }
 .heart.lost { filter: grayscale(1); opacity: 0.3; }
-
+ 
 /* ── SCREENS ── */
-.screen { display: none; position: relative; z-index: 1; }
-.screen.active { display: block; }
-
+.screen { display: none !important; position: relative; z-index: 1; }
+.screen.active { display: block !important; }
+ 
 /* ── HOME ── */
 #home {
   min-height: 100vh;
@@ -107,7 +107,7 @@ body::before {
 .mode-name { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 4px; }
 .mode-desc { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
 .mode-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; margin-top: 8px; }
-
+ 
 /* ── TOPIC SELECT ── */
 #topics { padding: 100px 20px 40px; max-width: 760px; margin: 0 auto; }
 .back-btn {
@@ -127,14 +127,14 @@ body::before {
 .topic-card .t-icon { font-size: 2rem; margin-bottom: 8px; }
 .topic-card .t-name { font-size: 0.88rem; font-weight: 700; color: var(--text); }
 .topic-card .t-cards { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
-
+ 
 /* ── FLASHCARD SCREEN ── */
 #flashcards { padding: 100px 20px 40px; max-width: 680px; margin: 0 auto; }
 .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .progress-text { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
 .progress-track { flex: 1; height: 8px; background: var(--surface2); border-radius: 100px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--teal), var(--blue)); transition: width 0.4s ease; }
-
+ 
 /* Flashcard — big, clear, dyslexia-friendly */
 .flashcard-wrap { perspective: 1200px; width: 100%; }
 .flashcard {
@@ -168,7 +168,7 @@ body::before {
   margin-top: 14px; animation: pulse 2s ease-in-out infinite;
 }
 @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
-
+ 
 .fc-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: center; flex-wrap: wrap; }
 .fc-btn {
   padding: 12px 28px; border-radius: 100px; cursor: pointer; font-family: 'Nunito',sans-serif;
@@ -178,7 +178,7 @@ body::before {
 .fc-btn.again:hover { background: rgba(255,107,157,0.25); transform: scale(1.04); }
 .fc-btn.good { background: rgba(6,214,160,0.15); color: var(--teal); border: 2px solid rgba(6,214,160,0.3); }
 .fc-btn.good:hover { background: rgba(6,214,160,0.25); transform: scale(1.04); }
-
+ 
 /* ── QUIZ SCREEN ── */
 #quiz-screen { padding: 100px 20px 40px; max-width: 680px; margin: 0 auto; }
 .quiz-card {
@@ -213,7 +213,7 @@ body::before {
 .q-opt.wrong { border-color: var(--pink); background: rgba(255,107,157,0.1); color: var(--pink); }
 .q-opt.wrong .opt-letter { background: var(--pink); color: #fff; }
 .q-opt:disabled { cursor: not-allowed; }
-
+ 
 .quiz-feedback {
   border-radius: 14px; padding: 16px 20px; margin-top: 14px; font-size: 0.9rem; font-weight: 700;
   display: none; animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
@@ -222,7 +222,7 @@ body::before {
 @keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
 .quiz-feedback.right { background: rgba(6,214,160,0.12); border: 1px solid rgba(6,214,160,0.3); color: var(--teal); }
 .quiz-feedback.wrong-fb { background: rgba(255,107,157,0.12); border: 1px solid rgba(255,107,157,0.3); color: var(--pink); }
-
+ 
 .next-btn {
   width: 100%; padding: 16px; border-radius: 14px; cursor: pointer; border: none;
   background: linear-gradient(135deg, var(--gold), #ff9f1c);
@@ -230,7 +230,7 @@ body::before {
   transition: all 0.2s; letter-spacing: 0.03em; margin-top: 14px; display: none;
 }
 .next-btn:hover { transform: scale(1.02); box-shadow: 0 6px 24px rgba(255,209,102,0.3); }
-
+ 
 /* ── RESULTS SCREEN ── */
 #results { padding: 100px 20px 40px; max-width: 640px; margin: 0 auto; text-align: center; }
 .results-trophy { font-size: 5rem; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
@@ -250,7 +250,7 @@ body::before {
 .res-btn.primary { background: linear-gradient(135deg, var(--gold), #ff9f1c); color: #1a1000; border: none; }
 .res-btn.secondary { background: none; border: 2px solid var(--border); color: var(--text-dim); }
 .res-btn:hover { transform: scale(1.04); }
-
+ 
 /* ── XP TOAST ── */
 #xp-toast {
   position: fixed; top: 70px; right: 20px; z-index: 300;
@@ -260,7 +260,7 @@ body::before {
   transition: all 0.3s; letter-spacing: 0.03em;
 }
 #xp-toast.show { opacity: 1; transform: translateY(0); }
-
+ 
 /* ── ACHIEVEMENT TOAST ── */
 #achievement-toast {
   position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
@@ -275,16 +275,16 @@ body::before {
 .ach-icon { font-size: 2rem; }
 .ach-text-title { font-size: 0.7rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
 .ach-text-name { font-size: 1rem; font-weight: 900; color: var(--text); }
-
+ 
 /* ── STREAK ── */
 .streak-fire { color: var(--gold); font-size: 1.1rem; }
-
+ 
 /* Accessibility: focus rings */
 button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
-
+ 
 /* Confetti canvas */
 #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 400; }
-
+ 
 @media(max-width:500px){
   .card-question{font-size:1.1rem}
   .quiz-q-text{font-size:1.05rem}
@@ -294,8 +294,9 @@ button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold);
 </style>
 </head>
 <body>
-
+ 
 <canvas id="confetti-canvas"></canvas>
+<div id="app-scroll">
 <div id="xp-toast">+50 XP ⭐</div>
 <div id="achievement-toast">
   <div class="ach-icon" id="ach-icon">🏆</div>
@@ -304,7 +305,7 @@ button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold);
     <div class="ach-text-name" id="ach-name">First Steps</div>
   </div>
 </div>
-
+ 
 <!-- HUD -->
 <div id="hud">
   <div class="hud-name">🔬 Juana</div>
@@ -317,7 +318,7 @@ button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold);
     <span class="heart">❤️</span><span class="heart">❤️</span><span class="heart">❤️</span>
   </div>
 </div>
-
+ 
 <!-- ══════════ HOME ══════════ -->
 <div id="home" class="screen active">
   <div class="hero-icon">🧪</div>
@@ -345,7 +346,7 @@ button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold);
   </div>
   <p style="color:var(--text-dim);font-size:0.8rem">Your progress is saved during this session 🌟</p>
 </div>
-
+ 
 <!-- ══════════ TOPIC SELECT ══════════ -->
 <div id="topics" class="screen">
   <button class="back-btn" onclick="goHome()">← Back</button>
@@ -353,7 +354,7 @@ button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold);
   <div class="screen-sub">Pick one — one thing at a time! 🎯</div>
   <div class="topic-grid" id="topic-grid"></div>
 </div>
-
+ 
 <!-- ══════════ FLASHCARDS ══════════ -->
 <div id="flashcards" class="screen">
   <button class="back-btn" onclick="goHome()">← Back</button>
@@ -381,7 +382,7 @@ button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold);
     <button class="fc-btn good" onclick="fcGood()">✅ Got it!</button>
   </div>
 </div>
-
+ 
 <!-- ══════════ QUIZ ══════════ -->
 <div id="quiz-screen" class="screen">
   <button class="back-btn" onclick="goHome()">← Exit Exam</button>
@@ -392,7 +393,7 @@ button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold);
   </div>
   <div id="quiz-container"></div>
 </div>
-
+ 
 <!-- ══════════ RESULTS ══════════ -->
 <div id="results" class="screen">
   <div class="results-trophy" id="results-trophy">🏆</div>
@@ -410,7 +411,7 @@ button:focus-visible, .mode-card:focus-visible { outline: 3px solid var(--gold);
     <button class="res-btn secondary" onclick="goHome()">🏠 Home</button>
   </div>
 </div>
-
+ 
 <script>
 /* ═══════════════════════════════
    DATA — ALL CLASS CONTENT
@@ -423,7 +424,7 @@ const TOPICS = [
   { id:'changes', name:'Changes of State', icon:'🌡️', color:'var(--purple)' },
   { id:'properties', name:'Properties', icon:'🔍', color:'var(--blue)' },
 ];
-
+ 
 const FLASHCARDS = {
   matter: [
     { q:'What is matter?', a:'Anything that has MASS and takes up space (VOLUME).', hint:'Think: can I touch it?' },
@@ -474,7 +475,7 @@ const FLASHCARDS = {
     { q:'Gold ring vs gold bar. Which properties are the SAME for both?', a:'The intensive ones: golden colour, density, melting point, conductivity. Extensive ones (mass, volume) are different.', hint:'From class: gold ring vs gold bar' },
   ],
 };
-
+ 
 // ── ALL QUIZ QUESTIONS (class-based) ──
 const ALL_QUIZ = [
   { topic:'changes', emoji:'🧊→💧', q:'A cold can of soda has water droplets on the outside. What change of state is happening to the water vapour in the air?', opts:['Evaporation','Condensation','Melting','Sublimation'], ans:1, exp:'The water vapour (gas) touches the cold surface → loses energy → becomes liquid. That is CONDENSATION.' },
@@ -493,7 +494,7 @@ const ALL_QUIZ = [
   { topic:'properties', emoji:'🥇', q:'A small gold ring and a large gold bar. Which property is the SAME for both?', opts:['Mass','Volume','Density','Weight'], ans:2, exp:'DENSITY is the same because it is an INTENSIVE property — it does not depend on how much gold there is. Mass and volume are different (extensive).' },
   { topic:'mass-vol', emoji:'🌕', q:'On the Moon your mass is 10 kg (same as on Earth). Your weight on the Moon is…', opts:['Also 10 kg (the same)','Greater than on Earth','Less than on Earth (≈16 N vs 98 N on Earth)','Zero'], ans:2, exp:'La MASA no cambia (cantidad of materia). El PESO depende of the gravedad — en la Luna la gravedad es menor, entonces el peso es menor.' },
 ];
-
+ 
 /* ═══════════════════════════════
    GAME STATE
 ═══════════════════════════════ */
@@ -502,14 +503,23 @@ let fcCards = [], fcIndex = 0, fcFlipped = false;
 let quizQuestions = [], quizIndex = 0, quizCorrect = 0, quizAnswered = false;
 let currentMode = 'flash';
 const XP_PER_LEVEL = [0,100,250,450,700,1000];
-
+ 
 /* ═══════════════════════════════
    NAVIGATION
 ═══════════════════════════════ */
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0,0);
+  // Hide all screens immediately
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = 'none';
+  });
+  // Show target
+  const target = document.getElementById(id);
+  target.classList.add('active');
+  target.style.display = 'block';
+  // Reset the scrollable container — works on all mobile browsers
+  const scroller = document.getElementById('app-scroll');
+  if (scroller) scroller.scrollTop = 0;
 }
 function goHome() { showScreen('home'); }
 function goTopics(mode) {
@@ -517,7 +527,7 @@ function goTopics(mode) {
   renderTopics();
   showScreen('topics');
 }
-
+ 
 /* ═══════════════════════════════
    TOPICS
 ═══════════════════════════════ */
@@ -534,7 +544,7 @@ function selectTopic(id) {
   if (currentMode === 'flash') startFlash(id);
   else startMiniQuiz(id);
 }
-
+ 
 /* ═══════════════════════════════
    FLASHCARDS
 ═══════════════════════════════ */
@@ -589,7 +599,7 @@ function endFlash() {
   checkAchievements('flash');
   setTimeout(goHome, 400);
 }
-
+ 
 /* ═══════════════════════════════
    QUIZ
 ═══════════════════════════════ */
@@ -619,7 +629,7 @@ function renderQuestion() {
   const pct = Math.round((quizIndex / total) * 100);
   document.getElementById('q-progress-fill').style.width = pct + '%';
   document.getElementById('q-progress-text').textContent = 'Question ' + (quizIndex+1) + ' of ' + total;
-
+ 
   const letters = ['A','B','C','D'];
   const html = `
     <div class="quiz-card">
@@ -647,7 +657,7 @@ function answerQ(i) {
   const opts = document.querySelectorAll('.q-opt');
   const fb = document.getElementById('quiz-feedback');
   opts.forEach(o => o.disabled = true);
-
+ 
   if (i === q.ans) {
     opts[i].classList.add('correct');
     quizCorrect++;
@@ -673,7 +683,7 @@ function nextQ() {
   quizIndex++;
   renderQuestion();
 }
-
+ 
 /* ═══════════════════════════════
    RESULTS
 ═══════════════════════════════ */
@@ -685,7 +695,7 @@ function showResults() {
   else if (pct >= 0.7) { trophy='😊'; title='Great job!'; stars='⭐⭐'; msg='Almost perfect! Review the topics you missed using Flashcards, then try again. You are doing great!'; }
   else if (pct >= 0.5) { trophy='💪'; title='Good effort!'; stars='⭐'; msg='You are on the right track! Use the Flashcards for the tricky topics — one at a time. You can do this!'; }
   else { trophy='📚'; title='Keep studying!'; stars=''; msg='No worries — everyone starts somewhere! Open the Flashcards for one topic, learn it well, then come back to the exam.'; }
-
+ 
   document.getElementById('results-trophy').textContent = trophy;
   document.getElementById('results-title').textContent = title;
   document.getElementById('results-score').textContent = quizCorrect + '/' + total;
@@ -698,7 +708,7 @@ function showResults() {
   if (pct >= 0.7) launchConfetti();
   checkAchievements('quiz');
 }
-
+ 
 /* ═══════════════════════════════
    XP & LEVELING
 ═══════════════════════════════ */
@@ -728,7 +738,7 @@ function updateLives() {
   const hearts = document.querySelectorAll('.heart');
   hearts.forEach((h,i) => { h.classList.toggle('lost', i >= lives); });
 }
-
+ 
 /* ═══════════════════════════════
    TOASTS & ACHIEVEMENTS
 ═══════════════════════════════ */
@@ -750,7 +760,7 @@ function checkAchievements(context) {
   if (context === 'quiz' && quizCorrect === quizQuestions.length) showAchievement('🌟','Perfect Score!');
   if (streak >= 5) showAchievement('🔥','🔥 Streak of ' + streak + '!');
 }
-
+ 
 /* ═══════════════════════════════
    CONFETTI
 ═══════════════════════════════ */
@@ -789,7 +799,7 @@ function launchConfetti() {
   }
   draw();
 }
-
+ 
 /* ═══════════════════════════════
    UTILS
 ═══════════════════════════════ */
@@ -800,11 +810,12 @@ function shuffle(arr) {
   }
   return arr;
 }
-
+ 
 // Keyboard support for mode cards
 document.querySelectorAll('.mode-card').forEach(c => {
   c.addEventListener('keypress', e => { if(e.key==='Enter'||e.key===' ') c.click(); });
 });
 </script>
+</div><!-- #app-scroll -->
 </body>
 </html>
